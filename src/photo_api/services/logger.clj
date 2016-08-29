@@ -8,11 +8,15 @@
     (rest)
     (apply str)))
 
-(defn in [app]
+(defn continue
+  ([value] (continue value identity))
+  ([value extracter] (println (extracter value)) value))
+
+(defn inbound [app]
   (fn [request]
-    (-> request
-      (:request-method)
-      (kw->caps)
-      (str " \"" (request :uri) "\"")
-      (println))
+    (continue request (fn [r]
+      (-> r
+        (:request-method)
+        (kw->caps)
+        (str " \"" (request :uri) "\""))))
     (app request)))

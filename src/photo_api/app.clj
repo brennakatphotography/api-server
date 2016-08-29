@@ -9,20 +9,20 @@
             [ring.middleware.cors :refer [wrap-cors]]
             [photo-api.services.request-parser :as parser]
             [photo-api.services.logger :as logger]
-            [photo-api.services.response :refer [->response]]
+            [photo-api.services.response :refer [->json]]
             [photo-api.api :as api]))
 
 (defroutes app-routes
-  (GET "/healthcheck" [] (->response {:system "OK"}))
+  (GET "/healthcheck" [] (->json {:system "OK"}))
   (context "/api" [] api/core)
-  (not-found {:status 404 :body {:message "Unknown resource"}}))
+  (not-found (->json {:message "Unknown resource"} 404)))
 
 (def app
   (-> app-routes
     (wrap-json-response)
     (parser/parse-query)
     (parser/parse-body)
-    (logger/in)
+    (logger/inbound)
     (wrap-cors #".*")))
 
 (defn -main [& args]

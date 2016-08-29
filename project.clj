@@ -9,6 +9,7 @@
                  [ring/ring-json "0.3.1"]
                  [ring/ring-defaults "0.2.1"]
                  [jumblerg/ring.middleware.cors "1.0.1"]
+                 [clj-aws-s3 "0.3.10" :exclusions [joda-time]]
                  [mysql/mysql-connector-java "5.1.39"]
                  [org.clojure/java.jdbc "0.3.6"]
                  [http-kit "2.1.18"]
