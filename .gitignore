@@ -1,3 +1,4 @@
+.env
 .lein*
 .nrepl-port
 target/
