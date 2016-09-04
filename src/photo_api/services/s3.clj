@@ -7,7 +7,7 @@
 
 (def bucket (env :s3-bucket))
 
-(defn upload [{name :filename data :tempfile type :content-type length :size}]
+(defn upload! [{data :tempfile type :content-type length :size} name]
   (s3/put-object cred bucket name (io/input-stream data)
     {:content-type type :content-length length}))
 
