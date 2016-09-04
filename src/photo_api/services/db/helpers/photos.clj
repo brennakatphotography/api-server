@@ -6,8 +6,9 @@
     (str id "_" version-id "_" (name nt) "." ext)))
 
 (defn result->filename [result]
-  (let [{id :id version-id :version_id ext :ext type :type} result]
-    (insert->filename id version-id type ext)))
+  (if result
+    (let [{id :id version-id :version_id ext :ext type :type} result]
+      (insert->filename id version-id type ext))))
 
 (defn filename->ext [filename]
   (-> filename

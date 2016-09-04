@@ -43,14 +43,14 @@
                              :description description
                              :taken_at taken-at
                              :folder_id folder-id})) :generated_key)
-          version-id ((insert photo_versions
-                        (values {:photo_id new-id
-                                 :file_extension ext})) :generated_key)]
+          ver-id ((insert photo_versions
+                    (values {:photo_id new-id
+                             :file_extension ext})) :generated_key)]
       (update photos
-        (set-fields {:active_photo_id version-id})
+        (set-fields {:active_photo_id ver-id})
         (where {:id new-id}))
       {:id new-id
-       :name (hp/insert->filename new-id version-id :full ext)
+       :name (hp/insert->filename new-id ver-id :full ext)
        :file file
        :filename filename})))
 
@@ -62,3 +62,9 @@
   (->> file
     (#(if (% 0) % (cons % '())))
     (map (save-new-photo! taken-at name description folder-id))))
+
+(defn delete-photo! [id type]
+  (let [filename (get-photo-filename id type)]
+    (delete photos
+      (where {:id id}))
+    filename))
