@@ -40,10 +40,8 @@ exports.up = function(knex, Promise) {
 exports.down = function(knex, Promise) {
   let sql = 'ALTER TABLE photos DROP FOREIGN KEY photos_active_photo_id_foreign';
   return knex.schema.raw(sql).then(() => {
-    return knex.schema.dropTable('photo_versions');
-  }).then(() => {
-    return knex.schema.dropTable('photos');
-  }).then(() => {
-    return knex.schema.dropTable('folders');
+    return ['photo_versions', 'photos', 'folders'].reduce((promise, table) => {
+      return promise.then(() => knex.schema.dropTableIfExists(table));
+    }, Promise.resolve());
   });
 };

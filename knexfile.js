@@ -7,12 +7,7 @@ try {
 module.exports = {
   development: {
     client: 'mysql',
-    connection: {
-      host: 'localhost',
-      database: 'photo_api',
-      user:     'root',
-      password: 'root'
-    }
+    connection: process.env.DATABASE_URL_DEV
   },
   integration: {
     client: 'mysql',
