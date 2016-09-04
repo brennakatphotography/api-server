@@ -4,6 +4,7 @@ exports.up = function(knex, Promise) {
     folders.increments('id');
     folders.integer('parent_folder_id').unsigned().references('id').inTable('folders').onDelete('CASCADE');
     folders.string('name');
+    folders.text('description');
     folders.datetime('created_at').defaultTo(knex.fn.now());
     folders.datetime('updated_at').defaultTo(knex.fn.now());
   }).then(() => {
@@ -20,14 +21,19 @@ exports.up = function(knex, Promise) {
     return knex.schema.createTable('photo_versions', photoVersions => {
       photoVersions.increments('id');
       photoVersions.integer('photo_id').unsigned().references('id').inTable('photos').onDelete('CASCADE');
-      photoVersions.string('full_url');
-      photoVersions.string('preview_url');
-      photoVersions.datetime('uploaded_at');
+      photoVersions.string('file_extension');
+      photoVersions.datetime('uploaded_at').defaultTo(knex.fn.now());
     });
   }).then(() => {
     return knex.schema.table('photos', photos => {
       photos.integer('active_photo_id').unsigned().references('id').inTable('photo_versions').onDelete('SET NULL');
     });
+  }).then(() => {
+    return knex('folders').insert({
+      name: 'PUBLIC', description: 'Publicly accessible folder used by portfolio site.'
+    }).then(() => knex('folders').insert({
+      name: 'TRASH', description: 'Trashed items.'
+    }));
   });
 };
 
