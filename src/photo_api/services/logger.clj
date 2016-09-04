@@ -1,5 +1,7 @@
 (ns photo-api.services.logger
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [clj-time.core :as time]
+            [clj-time.format :as format]))
 
 (defn ^:private kw->caps [kw]
   (->> kw
@@ -8,15 +10,21 @@
     (rest)
     (apply str)))
 
+(defn ^:private stamp [log]
+  (-> "[MM/dd/yyyy HH:mm:ss]: "
+    (format/formatter)
+    (format/unparse (time/now))
+    (#(str "INFO " %))
+    (str log)))
+
 (defn continue
   ([value] (continue value identity))
-  ([value extracter] (println (extracter value)) value))
+  ([value extracter] (println (stamp (extracter value))) value))
 
 (defn inbound [app]
   (fn [request]
-    (continue request (fn [r]
-      (-> r
-        (:request-method)
-        (kw->caps)
-        (str " \"" (request :uri) "\""))))
+    (continue request #(-> %
+      (:request-method)
+      (kw->caps)
+      (str " \"" (request :uri) "\"")))
     (app request)))

@@ -15,7 +15,7 @@
                  [http-kit "2.1.18"]
                  [korma "0.4.3"]
                  [org.clojure/data.json "0.2.6"]
-                 [clj-time "0.5.1"]]
+                 [clj-time "0.6.0"]]
   :jar-name "photo-api.jar"
   :uberjar-name "photo-api-standalone.jar"
   :min-lein-version "2.6.1")
