@@ -12,10 +12,10 @@
                  [jumblerg/ring.middleware.cors "1.0.1"]
                  [clj-aws-s3 "0.3.10" :exclusions [joda-time]]
                  [mysql/mysql-connector-java "5.1.39"]
-                 [org.clojure/java.jdbc "0.3.6"]
                  [http-kit "2.1.18"]
-                 [clojure.jdbc/clojure.jdbc-c3p0 "0.3.1"]
-                 [org.clojure/data.json "0.2.6"]]
+                 [korma "0.4.3"]
+                 [org.clojure/data.json "0.2.6"]
+                 [clj-time "0.5.1"]]
   :jar-name "photo-api.jar"
   :uberjar-name "photo-api-standalone.jar"
   :min-lein-version "2.6.1")
