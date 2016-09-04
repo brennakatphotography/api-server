@@ -1,5 +1,6 @@
 (ns photo-api.services.db.helpers.photos
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [photo-api.services.jwt :as jwt]))
 
 (defn insert->filename [id version-id type ext]
   (let [nt (or type :full)]
@@ -14,3 +15,9 @@
   (-> filename
     (s/split #"\.")
     (last)))
+
+(defn get-photo-filename
+  ([id type photo] (get-photo-filename id type photo identity))
+  ([id type photo check]
+    (if (and photo (check photo))
+      (result->filename (assoc photo :type type)))))

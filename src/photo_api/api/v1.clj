@@ -4,5 +4,11 @@
             [photo-api.api.v1.photos :as photos]))
 
 (defroutes core
-  (context "/folders" [] folders/core)
-  (context "/photos" [] photos/core))
+  (context "/folders" request
+    (if (:authenticated? request)
+      folders/authed
+      folders/unauthed))
+  (context "/photos" request
+    (if (:authenticated? request)
+      photos/authed
+      photos/unauthed)))

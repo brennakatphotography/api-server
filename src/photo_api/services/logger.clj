@@ -28,3 +28,13 @@
       (kw->caps)
       (str " \"" (request :uri) "\"")))
     (app request)))
+
+(defn request [app]
+  (fn [request]
+    (continue request)
+    (app request)))
+
+(defn authenticated? [app]
+  (fn [request]
+    (continue request #(str "Authenticated: " (:authenticated? %)))
+    (app request)))
