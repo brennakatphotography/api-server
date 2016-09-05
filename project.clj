@@ -16,7 +16,8 @@
                  [korma "0.4.3"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-time "0.6.0"]
-                 [clj-jwt "0.1.1"]]
+                 [clj-jwt "0.1.1"]
+                 [fivetonine/collage "0.2.1"]]
   :jar-name "photo-api.jar"
   :uberjar-name "photo-api-standalone.jar"
   :min-lein-version "2.6.1")

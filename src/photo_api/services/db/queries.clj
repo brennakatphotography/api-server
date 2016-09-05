@@ -1,6 +1,8 @@
 (ns photo-api.services.db.queries
   (:use photo-api.services.db)
-  (:require [korma.core :as db]
+  (:require [clj-time.core :refer [now]]
+            [clj-time.coerce :refer [to-sql-time]]
+            [korma.core :as db]
             [photo-api.services.db.helpers.folders :as hf]
             [photo-api.services.db.helpers.photos :as hp]))
 
@@ -15,11 +17,17 @@
 (defn get-all-public-folders []
   (get-all-subfolders 1))
 
+(defn get-photos-in-folder [id]
+  (db/select :photos (db/where {:folder_id id})))
+
+(defn get-root-folder []
+  {:name "ROOT FOLDER" :sub_folders (get-all-folders) :photos (get-photos-in-folder nil)})
+
 (defn get-folder [id]
   (let [folder (->> (db/select :folders (db/where {:id id})) (first))
-        photos (db/select :photos (db/where {:folder_id id}))
+        photos (get-photos-in-folder id)
         sub-folders (get-all-subfolders id)]
-    (assoc folder :photos photos :sub_folders sub-folders)))
+    (assoc folder :photos photos :sub_folders (or sub-folders []))))
 
 (defn get-public-folder [id]
   (if (hf/is-public? id (db/select :folders))
@@ -61,17 +69,14 @@
           ver-id ((db/insert :photo_versions
                     (db/values {:photo_id new-id
                              :file_extension ext})) :generated_key)
-          name (hp/insert->filename new-id ver-id :full ext)]
+          name-maker #(hp/insert->filename new-id ver-id % ext)]
       (db/update :photos
         (db/set-fields {:active_photo_id ver-id})
         (db/where {:id new-id}))
-      {:id new-id :name name :file file :filename filename})))
+      {:id new-id :name-maker name-maker :file file :filename filename :ext ext})))
 
-(defn save-new-photos! [{taken-at "taken_at"
-                        name "name"
-                        description "description"
-                        file "file"
-                        folder-id "folder_id"}]
+(defn save-new-photos!
+  [{taken-at :taken_at name :name description :description file :file folder-id :folder_id}]
   (if file
     (->> file
       (#(if (% 0) % (cons % '())))
@@ -83,14 +88,38 @@
       (db/where {:id id}))
     filename))
 
-(defn get-photo-or-data [>>> s3 get-filename id meta type]
+(defn update-photo! [id data]
+  (db/update :photos
+    (db/set-fields (assoc data :updated_at (to-sql-time (now))))
+    (db/where {:id id})))
+
+(defn get-photo-or-data
+  [id meta type {api :api err :err download :download img :img get-filename :get-filename}]
   (if meta
     (->> (get-photo id)
       (#(if %
-        (>>>/api %)
-        (>>>/err))))
+        (api %)
+        (err))))
     (->> (or type :full)
       (get-filename id)
       (#(if %
-        (>>>/img (s3/download %))
-        (>>>/err))))))
+        (img (download %))
+        (err))))))
+
+(defn save-new-folder! [data]
+  (->>
+    (db/insert :folders
+      (db/values data))
+    (:generated_key)
+    (assoc {} :id)))
+
+(defn update-folder! [id data]
+  (->>
+    (db/update :folders
+      (db/set-fields (assoc data :updated_at (to-sql-time (now))))
+      (db/where {:id id}))))
+
+(defn delete-folder! [id]
+  (->>
+    (db/delete :folders
+      (db/where {:id id}))))

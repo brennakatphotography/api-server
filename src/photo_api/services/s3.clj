@@ -7,9 +7,12 @@
 
 (def bucket (env :s3-bucket))
 
-(defn upload! [{data :tempfile type :content-type length :size} name]
-  (s3/put-object cred bucket name (io/input-stream data)
-    {:content-type type :content-length length}))
+(defn upload!
+  ([{data :tempfile type :content-type length :size} name]
+    (upload! {:tempfile data :content-type type :size length} name identity))
+  ([{data :tempfile type :content-type length :size} name throttler]
+    (s3/put-object cred bucket name (throttler data)
+      {:content-type type :content-length length})))
 
 (defn download [name]
   (s3/get-object cred bucket name))

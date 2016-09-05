@@ -8,7 +8,7 @@
             [ring.middleware.json :refer [wrap-json-response]]
             [ring.middleware.cors :refer [wrap-cors]]
             [photo-api.services.request-parser :as parser]
-            [photo-api.services.logger :as logger]
+            [photo-api.services.logger :as log]
             [photo-api.services.response :as >>>]
             [photo-api.api :as api]
             [photo-api.services.auth :as auth]))
@@ -22,12 +22,12 @@
 (def app
   (-> app-routes
     (wrap-json-response)
-    (logger/authenticated?)
-    ; (logger/request)
+    (log/authenticated?)
+    (log/request)
     (parser/parse-query)
     (parser/parse-body)
     (auth/authenticate)
-    (logger/inbound)
+    (log/inbound)
     (wrap-cors #".*")))
 
 (defn -main [& args]
