@@ -11,5 +11,5 @@
     (->> (or type :full)
       (get-filename id)
       (#(if %
-        (do (println (str "get-photo-or-data: " %)) (img (download %)))
+        (img (download %))
         (err))))))

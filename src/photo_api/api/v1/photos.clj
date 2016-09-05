@@ -11,7 +11,8 @@
 
 (defroutes unauthed
   (GET "/:id" [id meta type]
-    (help/get-photo-or-data id meta type (assoc fns :get-filename db/get-public-photo-filename)))
+    (let [pub-type (if (or (nil? type) (= type :full)) :large type)]
+      (help/get-photo-or-data id meta pub-type (assoc fns :get-filename db/get-public-photo-filename))))
   (POST "/" [] (>>>/unauthorized))
   (DELETE "/:id" [] (>>>/unauthorized)))
 
