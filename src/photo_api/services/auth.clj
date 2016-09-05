@@ -5,7 +5,6 @@
 (defn authenticate [app]
   (fn [request]
     (->> request
-      (:headers)
       (jwt/get-jwt)
       (jwt/verify-jwt)
       (or (env :bypass-auth))

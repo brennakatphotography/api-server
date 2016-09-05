@@ -24,9 +24,9 @@
     (wrap-json-response)
     (log/authenticated?)
     (log/request)
+    (auth/authenticate)
     (parser/parse-query)
     (parser/parse-body)
-    (auth/authenticate)
     (log/inbound)
     (wrap-cors #".*")))
 

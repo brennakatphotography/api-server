@@ -20,13 +20,24 @@
     (sign :HS256 (env :token-secret))
     (to-str)))
 
-(defn get-jwt [headers]
+(defn check-headers [{headers :headers}]
   (->> "authorization"
     (headers)
-    (#(or % ""))
+    (str)
     (split-at 7)
     (last)
-    (apply str)))
+    (apply str)
+    (#(if (empty? %) nil %))))
+
+(defn check-query [{query :query}]
+  (println (str "this is the query: " query))
+  (:access_token query))
+
+(defn get-jwt [request]
+  (or
+    (check-headers request)
+    (check-query request)
+    ""))
 
 (defn encode-data [data expiry]
   (->> (days expiry)
