@@ -1,67 +1,74 @@
-var env = process.argv[2] || 'development';
-var config = require('./knexfile');
-var knex = require ('knex')(config[env]);
-var exec = require('child_process').exec;
+const env = process.argv[2] || 'development';
+const config = require('./knexfile');
+const knex = require ('knex')(config[env]);
+const exec = require('child_process').exec;
 require('dotenv').load();
 
-
-
-wipeAws().then(rollBack).then(latest).then(() => {
-  console.log('Environement "' + env + '" has been successfully reset.');
-  process.exit();
-}).catch(err => {
-  console.error('An error occurred', err);
-  process.exit(1);
-});
-
-
-
-function wipeAws() {
+const wipeAws = () => {
   let bucket = getBucket(env);
-  return execute('aws s3api list-objects --bucket ' + bucket).then(result => {
-    let contents = result.Contents || [];
-    return Promise.all(contents.map(object => {
-      return execute('aws s3api delete-object --bucket ' + bucket + ' --key ' + object.Key);
-    }));
-  }).then(result => {
-    console.log('AWS Bucket "' + bucket + '" has been wiped.');
+  if (!bucket) {
+    exit('Invalid environment "' + env + '"');
+  }
+  console.log('emptying bucket "' + bucket + '"...');
+  return execute('aws s3api list-objects --bucket ' + bucket).then(({ Contents }) => {
+    return deleteEachObject(bucket, Contents || []);
   });
-}
+};
 
-function rollBack() {
+const deleteEachObject = (bucket, contents) => {
+  return () => {
+    return Promise.all(contents.map(object => {
+      console.log('deleting "' + object.Key + '"...');
+      let command = 'aws s3api delete-object --bucket ' + bucket + ' --key ' + object.Key;
+      return execute(command).then(() => console.log('"' + object.Key + '" has been deleted.'));
+    }));
+  };
+};
+
+const rollBackDB = () => {
   console.log('rolling back db to beginning state...');
   return knex.migrate.rollback().then(response => {
     if (response === 'none' || !response[0]) return Promise.resolve();
     return rollBack();
   });
-}
+};
 
-function latest() {
+const migrateLatest = () => {
   console.log('running knex migrations...');
   return knex.migrate.latest();
-}
+};
 
-function execute(command) {
-  return new Promise((resolve, reject) => {
-    exec(command, (err, data) => {
-      if (err) return reject(err);
-      try {
-        resolve(JSON.parse(data));
-      } catch (_) {
-        resolve(data);
-      }
-    });
+const execute = command => new Promise((resolve, reject) => {
+  return exec(command, (err, data) => {
+    if (err) return reject(err);
+    try {
+      resolve(JSON.parse(data));
+    } catch (_) {
+      resolve(data);
+    }
   });
-}
+});
 
-function getBucket(env) {
-  switch (env) {
-    case 'development':
-      return 'photoapi.brenna.dev';
-    case 'integration':
-      return 'photoapi.brenna.int';
-    default:
-      console.log('Invalid Environment: "' + env + '"');
-      process.exit(1);
+const getBucket = env => {
+  return {
+    development: 'photoapi.brenna.dev',
+    integration: 'photoapi.brenna.int'
+  }[env];
+};
+
+const exit = message => {
+  if (message) {
+    console.error(message);
+    process.exit(1);
   }
-}
+  process.exit();
+};
+
+
+
+wipeAws().then(rollBackDB).then(migrateLatest).then(() => {
+  console.log('Environement "' + env + '" has been successfully reset.');
+  exit();
+}).catch(err => {
+  exit('An error occurred', err);
+});
