@@ -28,7 +28,8 @@
     (parser/parse-query)
     (parser/parse-body)
     (log/inbound)
-    (wrap-cors #".*")))
+    (wrap-cors :access-control-allow-origin (re-pattern (or (env :allowed-origin) "http://localhost.*"))
+               :access-control-allow-methods [:get :put :post :delete])))
 
 (defn -main [& args]
   (let [port (-> env (:port) (or 3000) (Integer.))]

@@ -4,6 +4,8 @@
             [photo-api.api.v1.photos :as photos]))
 
 (defroutes core
+  (GET "/token" []
+    {:status 200 :body {:success true :data {:access_token (env :dev-token)}}})
   (context "/folders" request
     (if (:authenticated? request)
       folders/authed
