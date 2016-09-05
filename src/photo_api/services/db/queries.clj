@@ -1,13 +1,11 @@
 (ns photo-api.services.db.queries
   (:use photo-api.services.db)
-  (:require [clj-time.core :refer [now]]
-            [clj-time.coerce :refer [to-sql-time]]
-            [korma.core :as db]
-            [photo-api.services.db.helpers.folders :as hf]
-            [photo-api.services.db.helpers.photos :as hp]))
+  (:require [photo-api.services.db.queries.db-calls :as db]
+            [photo-api.services.db.queries.folder-helpers :as hf]
+            [photo-api.services.db.queries.photo-helpers :as hp]))
 
 (defn get-all-folders []
-  (hf/parse-folders (db/select :folders)))
+  (hf/parse-folders (db/get-all-folders)))
 
 (defn get-all-subfolders [id]
   (->> (get-all-folders)
@@ -17,35 +15,22 @@
 (defn get-all-public-folders []
   (get-all-subfolders 1))
 
-(defn get-photos-in-folder [id]
-  (db/select :photos (db/where {:folder_id id})))
+(def get-photos-in-folder db/get-photos-in-folder)
 
 (defn get-root-folder []
   {:name "ROOT FOLDER" :sub_folders (get-all-folders) :photos (get-photos-in-folder nil)})
 
 (defn get-folder [id]
-  (let [folder (->> (db/select :folders (db/where {:id id})) (first))
+  (let [folder (db/get-folder id)
         photos (get-photos-in-folder id)
         sub-folders (get-all-subfolders id)]
     (assoc folder :photos photos :sub_folders (or sub-folders []))))
 
 (defn get-public-folder [id]
-  (if (hf/is-public? id (db/select :folders))
+  (if (hf/is-public? id (db/get-all-folders))
     (get-folder id)))
 
-(defn get-photo [id]
-  (->>
-    (db/select :photos
-      (db/fields [:photos.id :id]
-              [:photos.active_photo_id :version_id]
-              [:photo_versions.file_extension :ext]
-              [:photos.folder_id :folder_id]
-              [:photo_versions.uploaded_at :uploaded_at]
-              [:photos.updated_at :updated_at]
-              [:photos.created_at :created_at])
-      (db/join :photo_versions (= :photos.id :photo_versions.photo_id))
-      (db/where {:photos.id id :photo_versions.id :photos.active_photo_id}))
-    (first)))
+(def get-photo db/get-photo)
 
 (defn get-photo-filename
   ([id type] (get-photo-filename id type (get-photo id)))
@@ -61,18 +46,10 @@
   (fn [file]
     (let [filename (:filename file)
           ext (hp/filename->ext filename)
-          new-id ((db/insert :photos
-                    (db/values {:name name
-                             :description description
-                             :taken_at taken-at
-                             :folder_id folder-id})) :generated_key)
-          ver-id ((db/insert :photo_versions
-                    (db/values {:photo_id new-id
-                             :file_extension ext})) :generated_key)
+          new-id (db/insert-photo! name description taken-at folder-id)
+          ver-id (db/insert-photo-version! new-id ext)
           name-maker #(hp/insert->filename new-id ver-id % ext)]
-      (db/update :photos
-        (db/set-fields {:active_photo_id ver-id})
-        (db/where {:id new-id}))
+      (db/update-photo! new-id {:active_photo_id ver-id})
       {:id new-id :name-maker name-maker :file file :filename filename :ext ext})))
 
 (defn save-new-photos!
@@ -84,42 +61,17 @@
 
 (defn delete-photo! [id type]
   (let [filename (get-photo-filename id type)]
-    (db/delete :photos
-      (db/where {:id id}))
+    (db/delete-photo! id)
     filename))
 
 (defn update-photo! [id data]
-  (db/update :photos
-    (db/set-fields (assoc data :updated_at (to-sql-time (now))))
-    (db/where {:id id})))
-
-(defn get-photo-or-data
-  [id meta type {api :api err :err download :download img :img get-filename :get-filename}]
-  (if meta
-    (->> (get-photo id)
-      (#(if %
-        (api %)
-        (err))))
-    (->> (or type :full)
-      (get-filename id)
-      (#(if %
-        (img (download %))
-        (err))))))
+  (db/update-photo! id (db/stamp data)))
 
 (defn save-new-folder! [data]
-  (->>
-    (db/insert :folders
-      (db/values data))
-    (:generated_key)
-    (assoc {} :id)))
+  {:id (db/insert-folder! data)})
 
 (defn update-folder! [id data]
-  (->>
-    (db/update :folders
-      (db/set-fields (assoc data :updated_at (to-sql-time (now))))
-      (db/where {:id id}))))
+  (db/update-folder! id (db/stamp data)))
 
 (defn delete-folder! [id]
-  (->>
-    (db/delete :folders
-      (db/where {:id id}))))
+  (db/delete-folder! id))

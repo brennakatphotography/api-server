@@ -1,4 +1,4 @@
-(ns photo-api.services.db.helpers.photos
+(ns photo-api.services.db.queries.photo-helpers
   (:require [clojure.string :as s]
             [photo-api.services.jwt :as jwt]))
 

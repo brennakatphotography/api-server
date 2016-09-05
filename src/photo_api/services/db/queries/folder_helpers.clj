@@ -1,4 +1,4 @@
-(ns photo-api.services.db.helpers.folders)
+(ns photo-api.services.db.queries.folder-helpers)
 
 (defn ->int [val]
   (try (Integer. val)
