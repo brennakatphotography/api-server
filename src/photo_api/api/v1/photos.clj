@@ -11,14 +11,15 @@
 
 (defroutes unauthed
   (GET "/:id" [id meta type]
-    (let [pub-type (if (or (nil? type) (= type :full)) :large type)]
-      (help/get-photo-or-data id meta pub-type (assoc fns :get-filename db/get-public-photo-filename))))
+    (let [img-type (if (nil? type) :large type)]
+      (help/get-photo-or-data id meta img-type (assoc fns :get-filename db/get-public-photo-filename))))
   (POST "/" [] (>>>/unauthorized))
   (DELETE "/:id" [] (>>>/unauthorized)))
 
 (defroutes authed
   (GET "/:id" [id meta type]
-    (help/get-photo-or-data id meta type (assoc fns :get-filename db/get-photo-filename)))
+    (let [img-type (if (nil? type) :full type)]
+      (help/get-photo-or-data id meta img-type (assoc fns :get-filename db/get-photo-filename))))
   (POST "/" {data :multipart-params}
     (->> data
       (keywordize-keys)

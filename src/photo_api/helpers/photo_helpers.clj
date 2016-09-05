@@ -8,7 +8,7 @@
       (#(if %
         (api %)
         (err))))
-    (->> (or type :full)
+    (->> type
       (get-filename id)
       (#(if %
         (img (download %))
