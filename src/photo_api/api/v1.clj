@@ -1,7 +1,8 @@
 (ns photo-api.api.v1
   (:use compojure.core)
   (:require [photo-api.api.v1.folders :as folders]
-            [photo-api.api.v1.photos :as photos]))
+            [photo-api.api.v1.photos :as photos]
+            [environ.core :refer [env]]))
 
 (defroutes core
   (GET "/token" []

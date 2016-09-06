@@ -1,7 +1,6 @@
 (ns photo-api.core
   (:gen-class)
-  (:use compojure.core
-        org.httpkit.server)
+  (:use compojure.core org.httpkit.server)
   (:require [compojure.handler :refer [site]]
             [compojure.route :refer [not-found]]
             [environ.core :refer [env]]
@@ -11,19 +10,21 @@
             [photo-api.services.logger :as log]
             [photo-api.services.response :as >>>]
             [photo-api.api :as api]
-            [photo-api.services.auth :as auth]))
+            [photo-api.services.auth :as auth]
+            [photo-api.auth :as oauth]))
 
 (defroutes app-routes
   (HEAD "/" [] "")
   (GET "/healthcheck" [] (>>>/json {:system "OK"}))
   (context "/api" [] api/core)
+  (context "/auth" [] oauth/core)
   (not-found (>>>/json {:message "Unknown resource"} 404)))
 
 (def app
   (-> app-routes
     (wrap-json-response)
     (log/authenticated?)
-    (log/request)
+    ; (log/request)
     (auth/authenticate)
     (parser/parse-query)
     (parser/parse-body)

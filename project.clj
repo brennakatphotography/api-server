@@ -4,6 +4,7 @@
   :aot [photo-api.core]
   :plugins [[lein-beanstalk "0.2.7"]]
   :dependencies [[org.clojure/clojure "1.8.0"]
+                 [sudharsh/clj-oauth2 "0.5.3"]
                  [environ "0.5.0"]
                  [compojure "1.5.1"]
                  [ring/ring-core "1.3.2"]
@@ -17,7 +18,11 @@
                  [org.clojure/data.json "0.2.6"]
                  [clj-time "0.6.0"]
                  [clj-jwt "0.1.1"]
-                 [fivetonine/collage "0.2.1"]]
+                 [fivetonine/collage "0.2.1"]
+                 [log4j "1.2.15" :exclusions [javax.mail/mail
+                                              javax.jms/jms
+                                              com.sun.jdmk/jmxtools
+                                              com.sun.jmx/jmxri]]]
   :jar-name "photo-api.jar"
   :uberjar-name "photo-api-standalone.jar"
   :min-lein-version "2.6.1")

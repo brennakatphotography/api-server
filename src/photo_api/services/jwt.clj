@@ -1,6 +1,6 @@
 (ns photo-api.services.jwt
   (:require [clj-jwt.core :refer :all]
-            [clj-time.core :refer [now plus days]]
+            [clj-time.core :refer [now plus days minutes]]
             [clojure.string :as s]
             [environ.core :refer [env]]
             [clojure.data.json :as json]))
@@ -30,7 +30,6 @@
     (#(if (empty? %) nil %))))
 
 (defn check-query [{query :query}]
-  (println (str "this is the query: " query))
   (:access_token query))
 
 (defn get-jwt [request]
@@ -40,10 +39,18 @@
     ""))
 
 (defn encode-data [data expiry]
-  (->> (days expiry)
+  (->> expiry
     (plus (now))
     (assoc {:data data :iat (now)} :exp)
     (encode)))
+
+(defn encode-temp [data]
+  (->> (minutes 1)
+    (encode-data data)))
+
+(defn encode-extended [data]
+  (->> (days 30)
+    (encode-data data)))
 
 (defn token->data [jwt]
   (if (verify-jwt jwt)
