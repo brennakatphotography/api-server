@@ -30,13 +30,25 @@
       (recur (codec/url-decode url))
       url)))
 
-(defn redirect-url [request] (oauth2/make-auth-request (oauth-config request) (construct-state request)))
+(defn redirect-url [request]
+  (->> request
+    (construct-state)
+    (oauth2/make-auth-request (oauth-config request))))
 
 (defn parse-info [data]
-  (assoc (:body data) :scope ["request-token"]))
+  (let [email (:email (:body data)) admin (env :admin-email) dev (env :dev-email)
+        access-level (cond
+                       (= email admin) :admin
+                       (and (= email dev) (env :dev-token)) :muck-about
+                       :else :customer)]
+    {:email email :role access-level}))
 
 (defn get-info [token]
-  (http/get "https://www.googleapis.com/oauth2/v1/tokeninfo" {:query-params {:access_token (:access-token token)} :as :json}))
+  (->> token
+    (:access-token)
+    (assoc {} :access_token)
+    (assoc {:as :json} :query-params)
+    (http/get "https://www.googleapis.com/oauth2/v1/tokeninfo")))
 
 (defn send-token [state token]
   (redirect (str (deconstruct-state state) "&token=" token)))
@@ -48,7 +60,7 @@
       (oauth2/get-access-token (oauth-config request))
       (get-info)
       (parse-info)
-      (jwt/encode-temp)
+      (jwt/encode-extended)
       (send-token state))))
 
 (defroutes core
