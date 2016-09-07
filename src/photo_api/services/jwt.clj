@@ -14,6 +14,15 @@
 
 (def decode str->jwt)
 
+(defn token->data [jwt]
+  (if (verify-jwt jwt)
+    (:claims (decode jwt))))
+
+(defn extract [jwt key]
+  (->> jwt
+    (token->data)
+    (key)))
+
 (defn encode [payload]
   (-> payload
     (jwt)
@@ -51,7 +60,3 @@
 (defn encode-extended [data]
   (->> (days 30)
     (encode-data data)))
-
-(defn token->data [jwt]
-  (if (verify-jwt jwt)
-    (:claims (decode jwt))))

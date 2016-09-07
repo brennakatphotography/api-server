@@ -36,5 +36,5 @@
 
 (defn authenticated? [app]
   (fn [request]
-    (continue request #(str "Authenticated: " (:authenticated? %)))
+    (continue request #(str "Authenticated: " (:verified (:auth %)) " : " (:role (:auth %))))
     (app request)))

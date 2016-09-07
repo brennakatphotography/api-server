@@ -4,9 +4,20 @@
 
 (defn authenticate [app]
   (fn [request]
-    (->> request
-      (jwt/get-jwt)
-      (jwt/verify-jwt)
-      (or (env :bypass-auth))
-      (assoc request :authenticated?)
-      (app))))
+    (let [jwt (jwt/get-jwt request)]
+      (->> {:role (jwt/extract jwt (comp :role :data))
+            :email (jwt/extract jwt (comp :email :data))
+            :verified (jwt/verify-jwt jwt)}
+        (assoc request :auth)
+        (app)))))
+
+(defn get-role [request]
+  (->> request
+    (:auth)
+    (:role)
+    (keyword)))
+
+(defn check-role [request allowed]
+  (->> request
+    (get-role)
+    (contains? allowed)))
