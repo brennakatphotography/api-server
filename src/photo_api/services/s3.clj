@@ -4,7 +4,7 @@
             [clojure.java.io :as io]
             [photo-api.services.images :as img]))
 
-(def cred {:access-key (env :aws-access-key-id) :secret-key (env :aws-access-key-secret)})
+(def cred {:access-key (env :aws-access-key-id) :secret-key (env :aws-secret-access-key)})
 
 (def bucket (env :s3-bucket))
 

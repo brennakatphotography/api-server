@@ -1,8 +1,4 @@
-try {
-  require('dotenv').load();
-} catch (err) {
-
-}
+require('./db/lein_env');
 
 module.exports = {
   development: {

@@ -2,17 +2,13 @@
   "name": "server-clojure",
   "version": "1.0.0",
   "description": "Rewrite of capstone server in clojure.",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "reload:db": "bin/reload-db"
   },
   "author": "skuttleman@gmail.com",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
     "knex": "^0.11.10",
     "mysql": "^2.11.1"
-  },
-  "devDependencies": {
-    "dotenv": "^2.0.0"
   }
 }

@@ -33,15 +33,15 @@ exports.up = function(knex, Promise) {
       name: 'PUBLIC', description: 'Publicly accessible folder used by portfolio site.'
     }).then(() => knex('folders').insert({
       name: 'TRASH', description: 'Trashed items.'
+    })).then(() => knex('folders').insert({
+      name: 'BANNER', description: 'Images for the Jumbotron.', parent_folder_id: 1
     }));
   });
 };
 
 exports.down = function(knex, Promise) {
   let sql = 'ALTER TABLE photos DROP FOREIGN KEY photos_active_photo_id_foreign';
-  return knex.schema.raw(sql).then(() => {
-    return ['photo_versions', 'photos', 'folders'].reduce((promise, table) => {
-      return promise.then(() => knex.schema.dropTableIfExists(table));
-    }, Promise.resolve());
-  });
+  return ['photo_versions', 'photos', 'folders'].reduce((promise, table) => {
+    return promise.then(() => knex.schema.dropTableIfExists(table));
+  }, knex.schema.raw(sql));
 };

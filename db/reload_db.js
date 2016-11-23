@@ -1,8 +1,8 @@
 const env = process.argv[2] || 'development';
-const config = require('./knexfile');
+const config = require('../knexfile');
 const knex = require ('knex')(config[env]);
 const exec = require('child_process').exec;
-require('dotenv').load();
+require('./lein_env');
 
 const wipeAws = () => {
   let bucket = getBucket(env);
@@ -16,21 +16,22 @@ const wipeAws = () => {
 };
 
 const deleteEachObject = (bucket, contents) => {
-  return () => {
-    return Promise.all(contents.map(object => {
-      console.log('deleting "' + object.Key + '"...');
-      let command = 'aws s3api delete-object --bucket ' + bucket + ' --key ' + object.Key;
-      return execute(command).then(() => console.log('"' + object.Key + '" has been deleted.'));
-    }));
-  };
+  return Promise.all(contents.map(object => {
+    console.log('deleting "' + object.Key + '"...');
+    let command = 'aws s3api delete-object --bucket ' + bucket + ' --key ' + object.Key;
+    return execute(command).then(() => console.log('"' + object.Key + '" has been deleted.'));
+  }));
 };
 
 const rollBackDB = () => {
   console.log('rolling back db to beginning state...');
-  return knex.migrate.rollback().then(response => {
-    if (response === 'none' || !response[0]) return Promise.resolve();
-    return rollBack();
-  });
+  const rollback = () => {
+    return knex.migrate.rollback().then(response => {
+      if (response === 'none' || !response[0]) return Promise.resolve();
+      return rollback();
+    });
+  };
+  return rollback();
 };
 
 const migrateLatest = () => {
@@ -56,15 +57,13 @@ const getBucket = env => {
   }[env];
 };
 
-const exit = message => {
-  if (message) {
-    console.error(message);
+const exit = (...messages) => {
+  if (messages.length) {
+    console.error(...messages);
     process.exit(1);
   }
   process.exit();
 };
-
-
 
 wipeAws().then(rollBackDB).then(migrateLatest).then(() => {
   console.log('Environement "' + env + '" has been successfully reset.');
