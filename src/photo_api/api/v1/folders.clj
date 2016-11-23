@@ -10,12 +10,18 @@
 
 (defroutes unauthed
   shared
-  (GET "/" [] (>>>/api (db/get-all-public-folders)))
+  (GET "/" [name]
+    (if name
+      (>>>/api (db/get-public-folder-by-name name))
+      (>>>/api (db/get-all-public-folders))))
   (GET "/:id" [id] (>>>/api (db/get-public-folder id))))
 
 (defroutes authed
   shared
-  (GET "/" [] (>>>/api (db/get-all-folders)))
+  (GET "/" [name]
+    (if name
+      (>>>/api (db/get-folder-by-name name))
+      (>>>/api (db/get-all-folders))))
   (GET "/trash" [] (>>>/api (db/get-folder 2)))
   (GET "/root" [] (>>>/api (db/get-root-folder)))
   (GET "/:id" [id] (>>>/api (db/get-folder id)))

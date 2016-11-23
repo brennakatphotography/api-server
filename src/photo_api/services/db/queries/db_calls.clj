@@ -17,6 +17,12 @@
       (db/where {:id id}))
     (first)))
 
+(defn get-folder-by-name [name]
+  (->>
+    (db/select :folders
+      (db/where {:name (.toUpperCase name)}))
+    (first)))
+
 (defn insert-folder! [data]
   (->>
     (db/insert :folders

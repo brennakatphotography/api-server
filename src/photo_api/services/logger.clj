@@ -17,6 +17,11 @@
     (#(str "INFO " %))
     (str log)))
 
+(defn ^:private make-url [method request]
+  (let [[query-string uri] (map request [:query-string :uri])
+        query-string (if query-string (str "?" query-string) "")]
+    (str method " \"" uri query-string "\"")))
+
 (defn continue
   ([value] (continue value identity))
   ([value extracter] (println (stamp (extracter value))) value))
@@ -26,7 +31,7 @@
     (continue request #(-> %
       (:request-method)
       (kw->caps)
-      (str " \"" (request :uri) "\"")))
+      (make-url request)))
     (app request)))
 
 (defn request [app]

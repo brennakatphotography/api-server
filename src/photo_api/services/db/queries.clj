@@ -20,11 +20,30 @@
 (defn get-root-folder []
   {:name "ROOT FOLDER" :sub_folders (get-all-folders) :photos (get-photos-in-folder nil)})
 
-(defn get-folder [id]
-  (let [folder (db/get-folder id)
+(defn build-folder [folder]
+  (let [id (:id folder)
         photos (get-photos-in-folder id)
         sub-folders (get-all-subfolders id)]
     (assoc folder :photos photos :sub_folders (or sub-folders []))))
+
+(defn get-folder-by-name [name]
+  (let [folder (db/get-folder-by-name name)]
+    (if folder
+      (build-folder folder)
+      {:photos [] :sub_folders []})))
+
+(defn get-public-folder-by-name [name]
+  (let [folder (db/get-folder-by-name name)]
+    (if (and
+          folder
+          (hf/is-public? (:id folder) (db/get-all-folders)))
+      (build-folder folder)
+      {:photos [] :sub_folders []})))
+
+(defn get-folder [id]
+  (->> id
+    (db/get-folder)
+    (build-folder)))
 
 (defn get-public-folder [id]
   (if (hf/is-public? id (db/get-all-folders))

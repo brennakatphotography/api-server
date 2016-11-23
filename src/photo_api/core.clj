@@ -10,6 +10,7 @@
             [photo-api.services.logger :as log]
             [photo-api.services.response :as >>>]
             [photo-api.api :as api]
+            [photo-api.bin :as bin]
             [photo-api.services.auth :as auth]
             [photo-api.auth :as oauth]))
 
@@ -17,6 +18,7 @@
   (HEAD "/" [] "")
   (GET "/healthcheck" [] (>>>/json {:system "OK"}))
   (context "/api" [] api/core)
+  (context "/bin" [] bin/core)
   (context "/auth" [] oauth/core)
   (not-found (>>>/json {:message "Unknown resource"} 404)))
 
