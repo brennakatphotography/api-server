@@ -2,6 +2,7 @@
   (:require [aws.sdk.s3 :as s3]
             [environ.core :refer [env]]
             [clojure.java.io :as io]
+            [photo-api.services.logger :as log]
             [photo-api.services.images :as img]))
 
 (def cred {:access-key (env :aws-access-key-id) :secret-key (env :aws-secret-access-key)})
@@ -12,9 +13,11 @@
   (try (io/delete-file filename)
     (catch Exception e nil)))
 
-(defn upload! [{data :tempfile type :content-type length :size} name throttler]        (throttler data) (println (str "uploading: " name)))
-    ; (s3/put-object cred bucket name (throttler data)
-    ;   {:content-type type :content-length length}))
+(defn upload! [{data :tempfile type :content-type length :size} name throttler]
+  (log/out (str "uploading: " name))
+  (if (env :no-aws-upload)
+    (throttler data)
+    (s3/put-object cred bucket name (throttler data) {:content-type type :content-length length})))
 
 (defn reduce-uploads!
   [{id :id file :file name-maker :name-maker ext :ext} urls {size :size type :type}]

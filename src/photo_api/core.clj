@@ -37,4 +37,4 @@
 (defn -main [& args]
   (let [port (-> env (:port) (or 3000) (Integer.))]
     (run-server (site app) {:port port})
-    (println (str "Server is listening on port: " port))))
+    (log/out (str "Server is listening on port: " port))))

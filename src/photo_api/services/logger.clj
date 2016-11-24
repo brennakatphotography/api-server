@@ -26,6 +26,9 @@
   ([value] (continue value identity))
   ([value extracter] (println (stamp (extracter value))) value))
 
+(defn out [& args]
+  (println (stamp (apply str args))))
+
 (defn inbound [app]
   (fn [request]
     (continue request #(-> %
