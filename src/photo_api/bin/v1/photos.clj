@@ -21,6 +21,6 @@
     (->> type
       (keyword)
       (pipe/set-if-not :full #{:small :thumbnail :large})
-      (db/get-public-photo-filename id)
+      (db/get-photo-filename id)
       (s3/download)
       (>>>/img))))

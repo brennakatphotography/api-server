@@ -48,7 +48,8 @@
               [:photos.folder_id :folder_id]
               [:photo_versions.uploaded_at :uploaded_at]
               [:photos.updated_at :updated_at]
-              [:photos.created_at :created_at])
+              [:photos.created_at :created_at]
+              [:photos.uuid :uuid])
       (db/join :photo_versions (= :photos.id :photo_versions.photo_id))
       (db/where {:photos.id id :photo_versions.id :photos.active_photo_id}))
     (first)))
@@ -61,7 +62,10 @@
   (->>
     (db/insert :photos
       (db/values {:name name :description description :taken_at taken-at :folder_id folder-id}))
-    (:generated_key)))
+    (:generated_key)
+    (#(db/select :photos
+      (db/where {:id %})))
+    (first)))
 
 (defn insert-photo-version! [photo-id ext]
   (->>

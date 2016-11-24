@@ -23,10 +23,10 @@
         url-qry (if size (str "?type=" (name type)) "")]
     (upload! file img-key process)
     (silent-delete! (img/tempfile size id ext))
-    (cons (str "/api/v1/photos/" id url-qry) urls)))
+    (cons (str "/bin/v1/photos/" id url-qry) urls)))
 
 (defn map-uploads!
-  [{id :id filename :filename file :file name-maker :name-maker ext :ext}]
+  [{id :id uuid :uuid filename :filename file :file name-maker :name-maker ext :ext}]
     (let [reducer (partial reduce-uploads! {:id id :file file :name-maker name-maker :ext ext})
           urls (reduce reducer '() img/sizes)]
       {:id id :filename filename :urls urls}))

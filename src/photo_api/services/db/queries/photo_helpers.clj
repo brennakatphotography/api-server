@@ -2,14 +2,14 @@
   (:require [clojure.string :as s]
             [photo-api.services.jwt :as jwt]))
 
-(defn insert->filename [id version-id type ext]
+(defn insert->filename [uuid version-id type ext]
   (let [nt (or type :full)]
-    (str id "_" version-id "_" (name nt) "." ext)))
+    (str uuid "_" version-id "_" (name nt) "." ext)))
 
 (defn result->filename [result]
   (if result
-    (let [{id :id version-id :version_id ext :ext type :type} result]
-      (insert->filename id version-id type ext))))
+    (let [{uuid :uuid version-id :version_id ext :ext type :type} result]
+      (insert->filename uuid version-id type ext))))
 
 (defn filename->ext [filename]
   (-> filename

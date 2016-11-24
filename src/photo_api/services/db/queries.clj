@@ -65,11 +65,13 @@
   (fn [file]
     (let [filename (:filename file)
           ext (hp/filename->ext filename)
-          new-id (db/insert-photo! name description taken-at folder-id)
+          new-photo (db/insert-photo! name description taken-at folder-id)
+          new-id (:id new-photo)
+          new-uuid (:uuid new-photo)
           ver-id (db/insert-photo-version! new-id ext)
-          name-maker #(hp/insert->filename new-id ver-id % ext)]
+          name-maker #(hp/insert->filename new-uuid ver-id % ext)]
       (db/update-photo! new-id {:active_photo_id ver-id})
-      {:id new-id :name-maker name-maker :file file :filename filename :ext ext})))
+      {:id new-id :uuid new-uuid :name-maker name-maker :file file :filename filename :ext ext})))
 
 (defn save-new-photos!
   [{taken-at :taken_at name :name description :description file :file folder-id :folder_id}]
