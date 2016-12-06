@@ -43,15 +43,29 @@
   (->>
     (db/select :photos
       (db/fields [:photos.id :id]
-              [:photos.active_photo_id :version_id]
-              [:photo_versions.file_extension :ext]
-              [:photos.folder_id :folder_id]
-              [:photo_versions.uploaded_at :uploaded_at]
-              [:photos.updated_at :updated_at]
-              [:photos.created_at :created_at]
-              [:photos.uuid :uuid])
+                 [:photos.active_photo_id :version_id]
+                 [:photo_versions.file_extension :ext]
+                 [:photos.folder_id :folder_id]
+                 [:photo_versions.uploaded_at :uploaded_at]
+                 [:photos.updated_at :updated_at]
+                 [:photos.created_at :created_at]
+                 [:photo_files.uuid :uuid])
       (db/join :photo_versions (= :photos.id :photo_versions.photo_id))
+      (db/join :photo_files (= :photos.photo_file_id :photo_files.id))
       (db/where {:photos.id id :photo_versions.id :photos.active_photo_id}))
+    (first)))
+
+(defn get-photo-with-uuid [id]
+  (->>
+    (db/select :photos
+      (db/fields [:photos.id :id]
+                 [:photos.active_photo_id :version_id]
+                 [:photos.folder_id :folder_id]
+                 [:photos.updated_at :updated_at]
+                 [:photos.created_at :created_at]
+                 [:photo_files.uuid :uuid])
+      (db/join :photo_files (= :photos.photo_file_id :photo_files.id))
+      (db/where {:photos.id id}))
     (first)))
 
 (defn get-photos-in-folder [id]
@@ -59,13 +73,19 @@
     (db/where {:folder_id id})))
 
 (defn insert-photo! [name description taken-at folder-id]
-  (->>
-    (db/insert :photos
-      (db/values {:name name :description description :taken_at taken-at :folder_id folder-id}))
-    (:generated_key)
-    (#(db/select :photos
-      (db/where {:id %})))
-    (first)))
+  (let [photo-file-id (->>
+                        (db/insert :photo_files
+                          (db/values {:uuid nil}))
+                        (:generated_key))]
+    (->>
+      (db/insert :photos
+        (db/values {:name name
+                    :description description
+                    :taken_at taken-at
+                    :folder_id folder-id
+                    :photo_file_id photo-file-id}))
+      (:generated_key)
+      (get-photo-with-uuid))))
 
 (defn insert-photo-version! [photo-id ext]
   (->>

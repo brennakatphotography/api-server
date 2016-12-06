@@ -26,13 +26,10 @@
   (-> app-routes
     (wrap-json-response)
     (log/authenticated?)
-    ; (log/request)
     (auth/authenticate)
     (parser/parse-query)
     (parser/parse-body)
-    (log/inbound)
-    (wrap-cors :access-control-allow-origin (re-pattern (or (env :allowed-origin) "http://localhost.*"))
-               :access-control-allow-methods [:get :put :post :delete])))
+    (log/inbound)))
 
 (defn -main [& args]
   (let [port (-> env (:port) (or 3000) (Integer.))]
