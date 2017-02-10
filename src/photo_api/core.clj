@@ -16,7 +16,7 @@
 
 (defroutes app-routes
   (HEAD "/" [] "")
-  (GET "/healthcheck" [] (>>>/json {:system "OK"}))
+  (GET "/healthcheck" [] (>>>/json {:a :ok}))
   (context "/api" [] api/core)
   (context "/bin" [] bin/core)
   (context "/auth" [] oauth/core)

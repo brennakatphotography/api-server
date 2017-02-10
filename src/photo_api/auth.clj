@@ -9,13 +9,17 @@
             [clj-oauth2.client :as oauth2]
             [clj-http.client :as http]))
 
+(def ^:private google-apis "https://www.googleapis.com")
+(def ^:private google-accounts "https://accounts.google.com/o")
+(def ^:private scope (map #(str google-apis "/auth/userinfo." %) ["email" "profile"]))
+
 (defn oauth-config [{{host "host"} :headers scheme :scheme}]
-  {:redirect-uri (str (name scheme) "://" host "/auth/google/callback")
+  {:redirect-uri (str (name scheme) "://" host "/auth/callback")
    :client-id (env :google-client-id)
    :client-secret (env :google-client-secret)
-   :scope ["https://www.googleapis.com/auth/userinfo.email" "https://www.googleapis.com/auth/userinfo.profile"]
-   :authorization-uri "https://accounts.google.com/o/oauth2/auth"
-   :access-token-uri "https://accounts.google.com/o/oauth2/token"
+   :scope scope
+   :authorization-uri (str google-accounts "/oauth2/auth")
+   :access-token-uri (str google-accounts "/oauth2/token")
    :access-query-param :access_token
    :grant-type "authorization_code"
    :access-type "online"
@@ -48,10 +52,10 @@
     (:access-token)
     (assoc {} :access_token)
     (assoc {:as :json} :query-params)
-    (http/get "https://www.googleapis.com/oauth2/v1/tokeninfo")))
+    (http/get (str google-apis "/oauth2/v1/tokeninfo"))))
 
 (defn send-token [state token]
-  (redirect (str (deconstruct-state state) "&token=" token)))
+  (redirect (str (deconstruct-state state) "?token=" token)))
 
 (defn callback [request]
   (let [state (:state (:query request))]
@@ -64,5 +68,5 @@
       (send-token state))))
 
 (defroutes core
-  (GET "/google/login" request (redirect (:uri (redirect-url request))))
-  (GET "/google/callback" request (callback request)))
+  (GET "/login" request (redirect (:uri (redirect-url request))))
+  (GET "/callback" request (callback request)))

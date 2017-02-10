@@ -1,4 +1,14 @@
 {
+  ;A comment
+
+  "NO_AWS_UPLOAD" true
   "ENV" "development"
-  "SUPER_SECRET_LUGGAGE_COMBINATION" 12345
+  "PORT" 1234
+  "TOKEN_SECRET" "Some Token Secret"
+
+  "DB_USER" "local_db_user" ;Another Comment
+  "DB_PASSWORD" "local_db_password"
+  "DB_HOST" "localhost"
+  "DB_PORT" 3306
+  "DB_NAME" "local_mysql_db_name"
 }

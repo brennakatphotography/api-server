@@ -44,5 +44,9 @@
 
 (defn authenticated? [app]
   (fn [request]
-    (continue request #(str "Authenticated: " (:verified (:auth %)) " : " (:role (:auth %))))
+    (let [auth (:auth request)]
+      (out "Authenticated"
+        (if (:verified auth)
+          (str " with role: '" (:role auth) "'")
+          ": false")))
     (app request)))
