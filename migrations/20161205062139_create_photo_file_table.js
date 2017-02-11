@@ -6,7 +6,6 @@ const findId = (array, uuid) => {
   return null;
 };
 
-
 exports.up = function(knex, Promise) {
   return knex.schema.raw('DROP TRIGGER before_insert_photos_uuid')
     .then(() => {

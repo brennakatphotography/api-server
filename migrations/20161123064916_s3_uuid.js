@@ -1,4 +1,3 @@
-
 exports.up = function(knex, Promise) {
   return knex.schema.table('photos', photos => {
     photos.uuid('uuid').unique();

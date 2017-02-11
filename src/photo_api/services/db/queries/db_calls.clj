@@ -101,3 +101,11 @@
 (defn delete-photo! [id]
   (db/delete :photos
     (db/where {:id id})))
+
+; MISC DB CALLS
+(defn get-user-role [email]
+  (->>
+    (db/select :user_roles
+      (db/where {:email email}))
+    (first)
+    (:role)))

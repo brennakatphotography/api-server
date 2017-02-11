@@ -7,17 +7,17 @@
             [base64-clj.core :as base64]
             [photo-api.services.jwt :as jwt]
             [clj-oauth2.client :as oauth2]
-            [clj-http.client :as http]))
+            [clj-http.client :as http]
+            [photo-api.services.db.queries :as db]))
 
 (def ^:private google-apis "https://www.googleapis.com")
 (def ^:private google-accounts "https://accounts.google.com/o")
-(def ^:private scope (map #(str google-apis "/auth/userinfo." %) ["email" "profile"]))
 
 (defn oauth-config [{{host "host"} :headers scheme :scheme}]
   {:redirect-uri (str (name scheme) "://" host "/auth/callback")
    :client-id (env :google-client-id)
    :client-secret (env :google-client-secret)
-   :scope scope
+   :scope (map #(str google-apis "/auth/userinfo." %) ["email" "profile"])
    :authorization-uri (str google-accounts "/oauth2/auth")
    :access-token-uri (str google-accounts "/oauth2/token")
    :access-query-param :access_token
@@ -40,11 +40,7 @@
     (oauth2/make-auth-request (oauth-config request))))
 
 (defn parse-info [data]
-  (let [email (:email (:body data)) admin (env :admin-email) dev (env :dev-email)
-        access-level (cond
-                       (= email admin) :admin
-                       (and (= email dev) (env :dev-token)) :muck-about
-                       :else :customer)]
+  (let [email (:email (:body data)) access-level (or (db/get-user-role email) :customer)]
     {:email email :role access-level}))
 
 (defn get-info [token]

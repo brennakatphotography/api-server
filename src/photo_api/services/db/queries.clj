@@ -96,3 +96,6 @@
 
 (defn delete-folder! [id]
   (db/delete-folder! id))
+
+(defn get-user-role [email]
+  (db/get-user-role email))

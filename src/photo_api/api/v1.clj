@@ -7,10 +7,10 @@
 
 (defroutes core
   (context "/folders" request
-    (if (auth/check-role request #{:admin :muck-about})
+    (if (auth/check-role request #{:admin :power-user})
       folders/authed
       folders/unauthed))
   (context "/photos" request
-    (if (auth/check-role request #{:admin :muck-about})
+    (if (auth/check-role request #{:admin :power-user})
       photos/authed
       photos/unauthed)))
