@@ -33,9 +33,9 @@
     (->> data
       (keywordize-keys)
       (db/update-photo! id)
-    (>>>/api {:message "Photo updated."}))))
+    (>>>/api nil {:message "Photo updated."}))))
   ; (DELETE "/:id" [id]
   ;   (->> :full
   ;     (db/delete-photo! id)
   ;     (s3/delete!))
-  ;   (>>>/api {:message "Photo deleted."})))
+  ;   (>>>/api nil {:message "Photo deleted."})))

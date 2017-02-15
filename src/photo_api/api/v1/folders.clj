@@ -34,7 +34,7 @@
     (->> data
       (keywordize-keys)
       (db/update-folder! id))
-    (>>>/json {:success true :message "Folder updated"})))
+    (>>>/api nil {:message "Folder updated"})))
   ; (DELETE "/:id" [id]
   ;   (db/delete-folder! id)
-  ;   (>>>/json {:success true :message "Folder deleted"})))
+  ;   (>>>/api nil {:message "Folder deleted"})))
