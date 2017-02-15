@@ -10,12 +10,14 @@
     (rest)
     (apply str)))
 
-(defn ^:private stamp [log]
-  (-> "[MM/dd/yyyy HH:mm:ss]: "
-    (format/formatter)
-    (format/unparse (time/now))
-    (#(str "INFO " %))
-    (str log)))
+(defn ^:private stamp
+  ([log] (stamp log "INFO"))
+  ([log level]
+    (-> "[MM/dd/yyyy HH:mm:ss]: "
+      (format/formatter)
+      (format/unparse (time/now))
+      (#(str level " " %))
+      (str log))))
 
 (defn ^:private make-url [method request]
   (let [[query-string uri] (map request [:query-string :uri])
@@ -28,6 +30,9 @@
 
 (defn out [& args]
   (println (stamp (apply str args))))
+
+(defn error [& args]
+  (println (stamp (apply str args) "ERROR")))
 
 (defn inbound [app]
   (fn [request]

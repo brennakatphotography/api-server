@@ -10,6 +10,7 @@
             [photo-api.services.response :as >>>]
             [photo-api.api :as api]
             [photo-api.bin :as bin]
+            [photo-api.services.error :as err]
             [photo-api.services.auth :as auth]
             [photo-api.auth :as oauth]))
 
@@ -23,6 +24,7 @@
 
 (def app
   (-> app-routes
+    (err/handle-error)
     ; (log/authenticated?)
     (auth/authenticate)
     (parser/parse-query)
