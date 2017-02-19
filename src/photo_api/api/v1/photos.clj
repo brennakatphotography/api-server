@@ -10,6 +10,7 @@
 (defroutes unauthed
   (GET "/:id" [id]
     (->> id
+      ;TODO -> public only
       (db/get-photo)
       (>>>/api)))
   (POST "/" [] (>>>/unauthorized))
@@ -29,11 +30,11 @@
         (#(>>>/api % {:message "Photo(s) saved" :status 201})))
       (catch Exception e
         (>>>/err "Unable to upload file" {:status 500}))))
-  (PUT "/:id" {{id :id} :params data :multipart-params}
+  (PATCH "/:id" {{id :id} :params data :multipart-params}
     (->> data
       (keywordize-keys)
-      (db/update-photo! id)
-    (>>>/api nil {:message "Photo updated."}))))
+      (db/update-photo! id))
+    (>>>/api nil {:message "Photo updated."})))
   ; (DELETE "/:id" [id]
   ;   (->> :full
   ;     (db/delete-photo! id)

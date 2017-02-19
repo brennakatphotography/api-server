@@ -30,7 +30,7 @@
       (keywordize-keys)
       (db/save-new-folder!)
       (>>>/api)))
-  (PUT "/:id" {data :multipart-params {id :id} :params}
+  (PATCH "/:id" {data :multipart-params {id :id} :params}
     (->> data
       (keywordize-keys)
       (db/update-folder! id))
