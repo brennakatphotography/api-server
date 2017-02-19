@@ -26,6 +26,6 @@
         (:body)
         (slurp)
         (json/read-str :key-fn keyword)
-        ((fn [body] (assoc request :body body)))
+        (#(assoc request :body %))
         (app))
       (catch Exception e (app request)))))

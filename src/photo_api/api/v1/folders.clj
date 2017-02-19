@@ -25,12 +25,12 @@
   (GET "/trash" [] (>>>/api (db/get-folder 2)))
   (GET "/root" [] (>>>/api (db/get-root-folder)))
   (GET "/:id" [id] (>>>/api (db/get-folder id)))
-  (POST "/" {data :multipart-params}
+  (POST "/" {data :body}
     (->> data
       (keywordize-keys)
       (db/save-new-folder!)
       (>>>/api)))
-  (PATCH "/:id" {data :multipart-params {id :id} :params}
+  (PATCH "/:id" {data :body {id :id} :params}
     (->> data
       (keywordize-keys)
       (db/update-folder! id))

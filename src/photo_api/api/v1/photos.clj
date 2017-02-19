@@ -29,8 +29,8 @@
         (map s3/map-uploads!)
         (#(>>>/api % {:message "Photo(s) saved" :status 201})))
       (catch Exception e
-        (>>>/err "Unable to upload file" {:status 500}))))
-  (PATCH "/:id" {{id :id} :params data :multipart-params}
+        (>>>/err "Unable to upload Photo(s)" {:status 500}))))
+  (PATCH "/:id" {{id :id} :params data :body}
     (->> data
       (keywordize-keys)
       (db/update-photo! id))

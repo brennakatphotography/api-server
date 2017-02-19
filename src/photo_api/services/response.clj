@@ -19,9 +19,7 @@
   ([data] (api data {:status 200}))
   ([data {status :status message :message}]
     (let [messages (if (nil? message) {} {:api message})]
-      (if data
-        (json {:data data :messages messages} (or status 200))
-        (err "Unknown resource" {:status 400})))))
+      (json {:data data :messages messages} (or status 200)))))
 
 (defn img [{{type :content-type length :content-length} :metadata content :content}]
   {:headers {"Content-Type" type "Content-Length" length} :body content})

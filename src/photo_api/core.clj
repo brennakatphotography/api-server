@@ -25,9 +25,9 @@
 (def app
   (-> app-routes
     (err/handle-error)
-    ; (log/authenticated?)
     (auth/authenticate)
     (parser/parse-query)
+    ; (log/request)
     (parser/parse-body)
     (log/inbound)
     (wrap-json-response)))
